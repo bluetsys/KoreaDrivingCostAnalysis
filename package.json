@@ -1,0 +1,9 @@
+{
+  "name": "korea-driving-cost-analysis",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Converter dependency for the Korea driving cost analysis",
+  "dependencies": {
+    "xlsx": "^0.18.5"
+  }
+}

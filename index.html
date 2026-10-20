@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E10YHPJ1VJ"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag("js", new Date());
+
+        gtag("config", "G-E10YHPJ1VJ");
+    </script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>대한민국 자동차 주행거리 분석 | 2012–2025</title>
+    <script>
+        window.MathJax = {
+            tex: { displayMath: [["\\[", "\\]"]], inlineMath: [["\\(", "\\)"]] },
+            svg: { fontCache: "global" },
+            options: {
+                skipHtmlTags: [
+                    "script",
+                    "noscript",
+                    "style",
+                    "textarea",
+                    "pre",
+                    "code",
+                ],
+            },
+        };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <header>
+        <div class="eyebrow">DATA INSIGHT · AUTOMOTIVE MOBILITY</div>
+        <h1>대한민국 자동차 주행거리 분석</h1>
+        <p>
+            2012–2025년 자동차검사 기반 주행거리 데이터를 활용한
+            전국·지역·차종·등록용도별 분석 리포트. 필터와 차트는 원본 CSV의 실제
+            수치에 연결됩니다.
+        </p>
+    </header>
+    <main class="wrap">
+        <section class="panel fusion-panel" id="integratedAnalysis">
+            <div class="eyebrow">핵심 분석 · 3개 통계 결합</div>
+            <h2>주행거리 × 자동차 표시연비 × 지역별 연료가격</h2>
+            <p class="fusion-section-note">
+                한국교통안전공단 자동차검사 기반 주행거리, 한국에너지공단 출시 모델
+                표시연비, 휘발유·경유·LPG 지역 평균판매가격을
+                <b>차종·연도·지역·연료 단위로 연결</b>한 분석입니다. 세 데이터 모두
+                차량 식별자를 공유하지 않으므로 실제 연료사용량이 아니라
+                <b>동일 거리 운행·출시 모델 동일 가중을 가정한 연료비 시나리오</b>입니다.
+            </p>
+            <div class="fusion-filter">
+                <div>
+                    <label for="fuseYear">분석 연도</label><select id="fuseYear"></select>
+                </div>
+                <div>
+                    <label for="fuseRegion">분석 지역</label><select id="fuseRegion"></select>
+                </div>
+                <div>
+                    <label for="fuseCar">자동차 종류</label><select id="fuseCar">
+                        <option>승용차</option>
+                        <option>승합차</option>
+                        <option>화물차</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="fuseFuel">연료</label><select id="fuseFuel">
+                        <option>휘발유</option>
+                        <option>경유</option>
+                        <option>LPG</option>
+                    </select>
+                </div>
+            </div>
+            <div class="fusion-kpis">
+                <div>
+                    <span>일평균 주행거리</span><strong id="fuseDaily">—</strong><small>검사 통계 · km/대·일</small>
+                </div>
+                <div>
+                    <span>연간 환산 주행거리</span><strong id="fuseDistance">—</strong><small>일평균 × 365 · km/대</small>
+                </div>
+                <div>
+                    <span>소비량 기준 평균연비</span><strong id="fuseEfficiency">—</strong><small id="fuseModels">표시연비 ·
+                        km/L</small>
+                </div>
+                <div>
+                    <span>지역 연료가격</span><strong id="fusePrice">—</strong><small>연도별 평균 · 원/L</small>
+                </div>
+                <div>
+                    <span>연간 예상 연료비/대</span><strong id="fuseCost">—</strong><small>추정 시나리오 · 원</small>
+                </div>
+            </div>
+            <div class="fusion-steps">
+                <b>검사기록 주행거리</b> → <b>일평균 × 365</b> →
+                <b>모델별 평균 소비율</b> → <b>연간 L 소비</b> →
+                <b>지역별 원/L 곱하기</b>
+            </div>
+            <div id="fuseInterpretation" class="fusion-results" aria-live="polite">
+                선택 조건의 결합 결과를 계산합니다.
+            </div>
+            <div class="fusion-pair">
+                <div>
+                    <h3>연도별 연간 예상 유류비 추이</h3>
+                    <svg class="chart" id="fusePlot" viewBox="0 0 610 290" role="img" aria-label="연도별 결합 추정 유류비"></svg>
+                </div>
+                <div>
+                    <h3>연도별 세 자료 결합 결과</h3>
+                    <div class="tablewrap fusion-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>연도</th>
+                                    <th>일평균 km</th>
+                                    <th>모델 수</th>
+                                    <th>유효연비 km/L</th>
+                                    <th>가격 원/L</th>
+                                    <th>연소비 L</th>
+                                    <th>연비용 원</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fuseHistory"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <h3>지역별 연간 예상 연료비 비교</h3>
+            <p class="subline">
+                동일한 차종·연료·연도에서 각 시도의 주행거리와 지역별 평균가격을 함께
+                반영합니다.
+            </p>
+            <div class="tablewrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>지역</th>
+                            <th>일평균 km</th>
+                            <th>연평균 거리 km</th>
+                            <th>연비 km/L</th>
+                            <th>가격 원/L</th>
+                            <th>연간 예상 유류비 원</th>
+                            <th>전국 대비</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fuseRegionRows"></tbody>
+                </table>
+            </div>
+            <h3>3개 통계의 결합 수식</h3>
+            <p class="fusion-section-note">
+                동일 차종·연료·출시연도 조건을 만족하는 모델들의 표시연비를 이용해
+                평균적인 1km당 연료 소비량을 계산합니다.
+                <b>모델마다 같은 거리를 달린다는 가정</b> 아래 조화평균 연비가
+                적합합니다. 실제 차량의 등록 대수와 운행 비중이 없기 때문에 실제
+                차량군 평균을 의미하지는 않습니다.
+            </p>
+            <div class="math">
+                \[E_{t,c,f}=\frac{N_{t,c,f}}{\displaystyle\sum_{i=1}^{N_{t,c,f}}\frac{1}{e_i}},\qquad
+                D_{t,r,c}=365\,d_{t,r,c}\]
+            </div>
+            <p class="fusion-section-note">
+                유효연비 = 선택된 자동차 표시연비 모델의 수 ÷ 모델별 연비 역수의 합.
+                연간 환산거리 = 검사 기반 일평균 주행거리 × 365.
+            </p>
+            <div class="math">
+                \[Q_{t,r,c,f}=\frac{D_{t,r,c}}{E_{t,c,f}},\qquad
+                C_{t,r,c,f}=Q_{t,r,c,f}\times P_{t,r,f}\]
+            </div>
+            <p class="fusion-section-note">
+                연간 예상 소비량(L) = 연간 환산거리(km) ÷ 유효연비(km/L). 연간 예상
+                유류비(원) = 연간 예상 소비량(L) × 지역 연평균 연료가격(원/L).
+            </p>
+            <p class="hint">
+                연비 모집단은 해당 연도까지 출시된 모델의 누적 집합(2026년 시나리오는
+                2026년 출시 모델 포함)이며, 폐차·판매량·등록 대수는 반영되지 않습니다.
+                2025년부터 일평균 주행거리 산정 방식이 달라졌으므로 2024↔2025 증감률은
+                순수 운행 변화로 해석할 수 없습니다. 2026년 주행거리·가격 자료는 없어
+                2025년 값을 대입한 시나리오로만 제공합니다. 전국 연료가격은 전국 가격
+                행이 없으므로 17개 시도 가격의 단순평균이며, 시군구에는 소속 시도
+                가격을 적용합니다. 가격은 연도별 평균이고 개인별 실구매가격이
+                아닙니다.
+            </p>
+        </section>
+        <section class="panel" id="methodology">
+            <h2>데이터는 어떻게 만들어지는가? · 자동차검사 기록부터 공표까지</h2>
+            <p class="details">
+                <b>생성 흐름:</b> 차량별 이전·최근 자동차검사 기록 확인 → 누적
+                주행거리 차이 계산 → 검사 간 경과일수로 나누어 일평균 주행거리 산출 →
+                해당 검사가 이루어진 연도와 지역·용도·차종에 따라 통계 분류 → 시기별
+                산정 기준에 따라 통계 제공.
+            </p>
+            <p class="details">
+                이 통계의 기준연도는 <b>해당 연도에 자동차검사를 받은 시점</b>을
+                의미합니다. 차량 한 대의 일평균 주행거리는 이전 검사에서 최근 검사까지
+                늘어난 계기판 누적거리와 검사일 간격을 이용해 계산합니다.
+            </p>
+            <div class="methodgrid">
+                <div class="formula">
+                    <span class="formula-title">① 자동차검사 계기판 기록으로 차량별 주행거리 산출</span>
+                    <p class="details">
+                        이전 검사와 최근 검사 때 기록된
+                        <b>계기판 누적 주행거리의 차이</b>를 두 검사일 사이의 날짜 수로
+                        나눕니다.
+                    </p>
+                    <div class="equation">
+                        <b>일반 텍스트:</b> 일평균 주행거리 = (최근 검사 누적거리 − 이전
+                        검사 누적거리) ÷ 검사 간 경과일수
+                    </div>
+                    <div class="math-display">
+                        \[\text{일평균 주행거리}=\frac{\text{최근 검사
+                        누적거리}-\text{이전 검사 누적거리}}{\text{검사 간 경과일수}}\]
+                    </div>
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td>이전 검사 (2022.06.01)</td>
+                                <td>30,000 km</td>
+                            </tr>
+                            <tr>
+                                <td>최근 검사 (2024.06.01)</td>
+                                <td>60,000 km</td>
+                            </tr>
+                            <tr>
+                                <td>검사 간 경과일수</td>
+                                <td>731일</td>
+                            </tr>
+                            <tr>
+                                <th>일평균 주행거리</th>
+                                <th>약 41.04 km/일</th>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="muted">
+                        2024년 통계에 포함되지만, 2024년 한 해만의 실측 운행거리는
+                        아닙니다.
+                    </p>
+                </div>
+                <div class="formula">
+                    <span class="formula-title">② 2024년까지: 가중치를 적용한 추정 예시</span>
+                    <p class="details">
+                        2024년까지는 차량 측정치에 차종·용도·연료·지역 등을 고려한
+                        <b>가중치</b>를 적용해 추정했습니다. 아래는 가중평균의 원리를
+                        보여주는 <b>일반적인 예시 산식</b>으로, 공표 통계의 실제 세부
+                        계산식을 확인한 것은 아닙니다.
+                    </p>
+                    <div class="equation">
+                        <b>일반 텍스트:</b> 가중평균 = Σ(차량별 일평균 주행거리 × 가중치)
+                        ÷ Σ(가중치)
+                    </div>
+                    <div class="math-display">
+                        \[\bar{x}_w=\frac{\sum_{i=1}^{n}w_i x_i}{\sum_{i=1}^{n}w_i}\]
+                    </div>
+                    <p class="muted">
+                        xᵢ: 차량 i의 일평균 주행거리 · wᵢ: 차량 i에 적용한 예시 가중치 ·
+                        n: 차량 수
+                    </p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>가상 차량</th>
+                                <th>일평균 거리</th>
+                                <th>예시 가중치</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>A</td>
+                                <td>30 km</td>
+                                <td>1.2</td>
+                            </tr>
+                            <tr>
+                                <td>B</td>
+                                <td>50 km</td>
+                                <td>0.8</td>
+                            </tr>
+                            <tr>
+                                <td>C</td>
+                                <td>70 km</td>
+                                <td>1.0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="equation">
+                        <b>일반 텍스트:</b> (30 × 1.2 + 50 × 0.8 + 70 × 1.0) ÷ (1.2 + 0.8
+                        + 1.0) = <b>48.67 km/일</b>
+                    </div>
+                    <div class="math-display">
+                        \[\bar{x}_w=\frac{30(1.2)+50(0.8)+70(1.0)}{1.2+0.8+1.0}\approx
+                        48.67\;\mathrm{km/일}\]
+                    </div>
+                </div>
+            </div>
+            <div class="methodgrid">
+                <div class="formula">
+                    <span class="formula-title">③ 2025년부터: 가중치 가공 없는 측정치</span>
+                    <p>
+                        같은 세 대의 측정치를 단순 산술평균하는 <b>비교용 예시</b>는
+                        다음과 같습니다.
+                    </p>
+                    <div class="equation">
+                        <b>일반 텍스트:</b> 산술평균 = (30 + 50 + 70) ÷ 3 =
+                        <b>50.00 km/일</b>
+                    </div>
+                    <div class="math-display">
+                        \[\bar{x}=\frac{\sum_{i=1}^{n}x_i}{n}=\frac{30+50+70}{3}=50\;\mathrm{km/일}\]
+                    </div>
+                    <p class="muted">
+                        실제 공표 통계의 집계 산식이 단순 산술평균이라고 확정하는 것은
+                        아닙니다.
+                    </p>
+                </div>
+                <div class="formula">
+                    <span class="formula-title">④ 왜 2024년과 2025년을 직접 비교하면 안 될까?</span>
+                    <p>
+                        위 가상 사례에서는 <b>같은 차량·같은 주행거리</b>임에도 가중치
+                        사용 여부에 따라 결과가 <b>48.67km → 50.00km</b>로 달라집니다.
+                        따라서 실제 데이터에서 나타나는 2025년의 변화에는 운행 패턴뿐
+                        아니라 <b>산정 방법 변경 효과</b>도 섞일 수 있습니다.
+                    </p>
+                </div>
+            </div>
+            <p class="methodnote">
+                <b>자료 해석 주의:</b> 검사받은 차량의 구간 평균이며 해당 연도
+                1월~12월 전체 실측 주행거리가 아닙니다. 2025년부터 가중치 적용 방식이
+                변경되어 과거와 수치를 직접 연결해 증감의 원인으로 단정하기
+                어렵습니다. 2026년 변경승인에 따라 연간 주행거리는 승인통계에서
+                제외되었습니다. 2023.07.01. 군위군은 대구광역시로 편입되었습니다.
+            </p>
+            <p class="methodnote">
+                <b>중요:</b> 위 A·B·C 차량과 1.2·0.8·1.0 가중치는
+                <b>계산 원리를 설명하기 위해 구성한 가상 예시</b>입니다.
+                한국교통안전공단의 실제 차량별 가중치, 세부 층화 방식 또는 공식 산식을
+                재현한 것은 아닙니다. 공식 통계의 2024년 이전 값은
+                차종·용도·연료·지역별 가중치를 적용한 추정치이고, 2025년 값은 가중치
+                가공 없는 측정치입니다.
+            </p>
+        </section>
+        <div class="warning">
+            <b>통계 해석 안내 · 2025년 산정 방식 변경</b><br />2012–2024년 일평균
+            주행거리는 가중치를 적용한 <b>추정치</b>, 2025년은 가중치 가공 없는
+            <b>측정치</b>입니다. 전년 대비 변화는 계산할 수 있지만 실제 운행
+            증가·감소로 바로 해석해서는 안 됩니다. 검사 연도의 값은 그해
+            주행거리만이 아닌 <b>이전검사~최근검사 사이의 평균</b>입니다.
+        </div>
+        <div class="panel">
+            <h2>분석 조건</h2>
+            <div class="controls">
+                <div class="field">
+                    <label for="region">분석 지역</label><select id="region"></select>
+                </div>
+                <div class="field">
+                    <label for="usage">등록 용도</label><select id="usage">
+                        <option value="0">전체</option>
+                        <option value="1">비사업용</option>
+                        <option value="2">사업용</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="vehicle">차종</label><select id="vehicle">
+                        <option value="0">합계</option>
+                        <option value="1">승용차</option>
+                        <option value="2">승합차</option>
+                        <option value="3">화물차</option>
+                        <option value="4">특수차</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="metric">지표</label><select id="metric">
+                        <option value="0">일평균 주행거리 (km/대)</option>
+                        <option value="1">연간 주행거리 (천 km)</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="year">비교 기준 연도</label><select id="year"></select>
+                </div>
+            </div>
+        </div>
+        <section class="grid">
+            <div class="metric">
+                <span id="m1title">선택 연도 값</span><strong id="m1">—</strong><small id="m1foot">—</small>
+            </div>
+            <div class="metric">
+                <span>전년도 값</span><strong id="m2">—</strong><small id="m2foot">—</small>
+            </div>
+            <div class="metric">
+                <span>전년 대비</span><strong id="m3">—</strong><small id="m3foot">—</small>
+            </div>
+            <div class="metric">
+                <span>2012년 대비</span><strong id="m4">—</strong><small id="m4foot">동일 지표의 장기 변화</small>
+            </div>
+        </section>
+        <section class="twocol">
+            <div class="panel">
+                <h2>01 · 연도별 주행거리 추세</h2>
+                <div class="subline">
+                    2024년과 2025년 사이 점선은 산정 방식 변경을 나타냅니다
+                </div>
+                <svg id="trend" class="chart" viewBox="0 0 660 300" role="img" aria-label="연도별 주행거리 추세"></svg>
+                <div class="legend">
+                    <span><i class="dot" style="background: #60a5fa"></i>2012–2024</span><span><i class="dot"
+                            style="background: #f59e0b"></i>2025 (방식
+                        변경)</span>
+                </div>
+                <p id="trendNarrative" class="details"></p>
+            </div>
+            <div class="panel">
+                <h2>02 · 차종별 주행거리 비교</h2>
+                <div class="subline">선택 지역·등록용도·연도 기준</div>
+                <svg id="bars" class="chart" viewBox="0 0 500 300" role="img" aria-label="차종별 주행거리 비교"></svg>
+                <p id="vehicleNarrative" class="details"></p>
+            </div>
+        </section>
+        <section class="two">
+            <div class="panel">
+                <h2>03 · 등록용도별 비교</h2>
+                <div class="subline">동일 지역·차종·연도의 일평균 주행거리</div>
+                <svg id="usageBars" class="chart" viewBox="0 0 500 270" role="img" aria-label="등록용도별 주행거리 비교"></svg>
+                <p id="usageNarrative" class="details"></p>
+            </div>
+            <div class="panel">
+                <h2>04 · 연도별 원자료</h2>
+                <div class="tablewrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>연도</th>
+                                <th>주행거리</th>
+                                <th>전년 대비</th>
+                                <th>비고</th>
+                            </tr>
+                        </thead>
+                        <tbody id="yearTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        <section class="panel">
+            <h2>05 · 광역자치단체별 비교</h2>
+            <div class="subline">
+                선택 용도·차종·연도 기준. 지역별 주행거리는 지역 합계의 단순 합산값이
+                아닙니다.
+            </div>
+            <div class="two">
+                <div>
+                    <svg id="regionBars" class="chart" viewBox="0 0 560 470" style="height: 470px" role="img"
+                        aria-label="지역별 상위 지역"></svg>
+                </div>
+                <div class="tablewrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>순위</th>
+                                <th>시도</th>
+                                <th>값</th>
+                            </tr>
+                        </thead>
+                        <tbody id="regionTable"></tbody>
+                    </table>
+                </div>
+            </div>
+            <p class="details" id="regionNarrative"></p>
+        </section>
+        <section class="two">
+            <div class="panel">
+                <h2>06 · 데이터에서 읽을 수 있는 것</h2>
+                <div id="insights" class="details"></div>
+            </div>
+            <div class="panel">
+                <h2>07 · 산정기준 및 주의사항</h2>
+                <ol class="notes">
+                    <li>
+                        <b>검사 기반 평균:</b> 기준년도에 검사를 받은 차량의 이전검사부터
+                        최근검사까지 일평균 주행거리이며, 해당 연도 단독 실제 운행거리와
+                        다릅니다.
+                    </li>
+                    <li>
+                        <b>2024년까지:</b> 차종·용도·연료·지역별 가중치를 적용한 추정치를
+                        사용했습니다.
+                    </li>
+                    <li>
+                        <b>2025년부터:</b> 일평균 주행거리 측정치를 가공 없이 제공하여
+                        2024년 이전과 산정 기준이 단절됩니다.
+                    </li>
+                    <li>
+                        <b>연간 주행거리:</b> 2026년 변경승인으로 승인통계에서
+                        제외되었으며, 원본 파일에서 2025년 값은 결측입니다.
+                    </li>
+                    <li>
+                        <b>지역 개편:</b> 2023년 7월 1일부터 군위군은 대구광역시
+                        관할입니다. 과거 지역 경계와 직접 비교할 때 주의해야 합니다.
+                    </li>
+                    <li>
+                        <b>빈 값:</b> 자료가 없는 항목은 0이 아니라 결측(—)으로
+                        표시합니다.
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <section class="panel" id="fuelAnalysis">
+            <h2>연비 · 연료별 주행 비용 추정</h2>
+            <p>
+                한국에너지공단의 <b>자동차 표시연비</b> 자료를 자동차
+                종류·연료·출시연도별로 집계하고, 한국교통안전공단의 일평균 주행거리와
+                지역별 휘발유·경유·LPG 판매가격을 결합한
+                <b>통계 기반 시나리오</b>입니다. 주행거리는 실제 연료별·모델별로
+                제공되지 않으므로, 선택한 차종의 평균 주행거리를 연료별 대표
+                주행거리로 가정합니다. 2026년 출시 모델은 연비 통계에 포함하지만
+                2026년 주행거리 실측값은 없으므로 2025년 주행거리로 계산하는 별도
+                시나리오입니다.
+            </p>
+            <div class="fuel-controls">
+                <div>
+                    <label for="fuelYear">출시연도 기준</label><select id="fuelYear"></select>
+                </div>
+                <div>
+                    <label for="fuelCar">자동차 종류</label><select id="fuelCar">
+                        <option value="전체">전체</option>
+                        <option>승용차</option>
+                        <option>승합차</option>
+                        <option>화물차</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="fuelType">연료</label><select id="fuelType">
+                        <option value="전체">전체</option>
+                        <option>휘발유</option>
+                        <option>경유</option>
+                        <option>LPG</option>
+                        <option>전기</option>
+                        <option>전기+휘발유</option>
+                        <option>수소</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="fuelBasis">표본 선택</label><select id="fuelBasis">
+                        <option value="cumulative">해당 연도까지 출시 모델 누적</option>
+                        <option value="year">해당 연도 출시 모델만</option>
+                    </select>
+                </div>
+            </div>
+            <div class="fuel-grid">
+                <div class="fuel-fact">
+                    <span>선택 표본 모델 수</span><strong id="fuelCount">—</strong><span>동일 모델 가중 · 중복 행은 원자료 기준</span>
+                </div>
+                <div class="fuel-fact">
+                    <span>표시연비 산술평균</span><strong id="fuelAvg">—</strong><span id="fuelAvgUnit">km/L 또는 km/kWh</span>
+                </div>
+                <div class="fuel-fact">
+                    <span>연료 소비량 기준 유효 연비</span><strong id="fuelHarm">—</strong><span>역수 평균의 역수 · 단일 연료만 계산</span>
+                </div>
+                <div class="fuel-fact">
+                    <span>연간 예상 주행거리</span><strong id="fuelDist">—</strong><span id="fuelDistNote">차종 일평균 × 365 ·
+                        가정</span>
+                </div>
+            </div>
+            <div class="two">
+                <div>
+                    <h3>출시연도별 평균 표시연비 추이</h3>
+                    <svg class="fuel-plot" id="fuelTrend" viewBox="0 0 610 310" role="img"
+                        aria-label="연비 출시연도 추이"></svg>
+                    <div class="hint">
+                        2026년 출시 모델까지 표시연비 집계. 연료 전체 선택 시 차트는
+                        휘발유 기준. 서로 다른 단위(km/L, km/kWh 등)를 섞어 평균하지
+                        않습니다.
+                    </div>
+                </div>
+                <div>
+                    <h3>연료별 평균 연비와 연간 예상 연료비</h3>
+                    <div class="tablewrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>연료</th>
+                                    <th>모델 수</th>
+                                    <th>평균 표시연비</th>
+                                    <th>소비 기준 유효연비</th>
+                                    <th>예상 연간 소비</th>
+                                    <th>연간 비용</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fuelRows"></tbody>
+                        </table>
+                    </div>
+                    <p class="hint">
+                        연간 비용은 선택한 지역과 기준연도의 평균 가격으로 환산한
+                        (2026년에는 2025년 가격을 적용한 시나리오) <b>예상액</b>이며 실제
+                        운행 차량 전체의 유류비 합계가 아닙니다. 전기·수소·전기+휘발유는
+                        적절한 가격·에너지원 분리 자료가 없으면 비용 미산정으로
+                        표시합니다.
+                    </p>
+                </div>
+            </div>
+            <h3>계산 과정 및 산식</h3>
+            <p>
+                ① 자동차검사 누적 계기판 주행거리의 차이를 검사 간 경과일수로 나누어
+                일평균 주행거리를 산출합니다.
+            </p>
+            <div class="math">
+                \[d_i=\frac{M_{i,\,\mathrm{최근}}-M_{i,\,\mathrm{이전}}}{t_{i,\,\mathrm{최근}}-t_{i,\,\mathrm{이전}}}\]
+            </div>
+            <p>
+                ② 2024년까지 주행거리 통계는 차종·용도·연료·지역별 가중치를 적용한
+                추정치입니다. 아래 가중평균은 계산 원리의
+                <b>일반적인 예시 수식</b>으로, 공단의 세부 승인 산식을 확인한 것은
+                아닙니다.
+            </p>
+            <div class="math">
+                \[\bar d_w=\frac{\sum_{i=1}^{n}w_i d_i}{\sum_{i=1}^{n}w_i}\]
+            </div>
+            <p>
+                ③ 같은 주행거리를 각 차량이 주행한다고 가정할 때, 차량 모델별
+                표시연비의 산술평균과 실제 연료량 합산에 필요한 유효 연비는 다릅니다.
+                유효 연비는 연비 역수를 평균하여 구합니다.
+            </p>
+            <div class="math">
+                \[\overline{e}=\frac{1}{n}\sum_{i=1}^{n}e_i,\qquad
+                e_{\mathrm{효율}}=\frac{n}{\sum_{i=1}^{n}\frac{1}{e_i}}\]
+            </div>
+            <p>
+                ④ 연간 예상 주행거리와 연료 소비량 및 연료비는 아래처럼 산정합니다.
+                <b>출시연도별 모델 수는 등록·운행 대수 비중이 아닙니다.</b>
+            </p>
+            <div class="math">
+                \[D=365\times \bar d,\quad Q=\frac{D}{e_{\mathrm{효율}}},\quad
+                C=Q\times P_{r,y,f}\]
+            </div>
+            <p class="details">
+                여기서 <b>D</b>는 가정한 연간 거리(km), <b>Q</b>는 연간 연료량(L),
+                <b>P</b>는 해당 지역·연도·연료의 평균 판매가격(원/L), <b>C</b>는 예상
+                연간 연료비(원)입니다. 전기는 연비 단위가 km/kWh이며,
+                LPG·경유·휘발유의 연비 단위는 km/L입니다. 플러그인
+                하이브리드(전기+휘발유)와 수소는 서로 다른 에너지 측정 단위와 소비
+                구조를 고려해야 하므로 합산 연비 비교에서 제외합니다.
+            </p>
+            <p class="hint">
+                2025년 일평균 주행거리 산정 방식 변경, 2026년 연간 주행거리 승인통계
+                제외는 기존 분석 안내와 동일하게 적용됩니다. 2026년 출시차량에 2025년
+                평균 일평균 주행거리를 곱한 값은 2026년 실측치가 아닙니다.
+            </p>
+            <div class="details">
+                <b>연비 출처:</b> 한국에너지공단 수송통합운영시스템, 「자동차
+                표시연비」, 사용자가 제공한 「자동차표시연비 목록.xlsx」 (2026년 출시
+                차량 포함).<br /><b>주행거리 출처:</b> 한국교통안전공단,
+                「자동차주행거리통계」, 2025, 2026.10.20,
+                <a href="https://kosis.kr/statHtml/statHtml.do?orgId=426&amp;tblId=DT_426001_N004&amp;conn_path=I2"
+                    target="_blank" rel="noopener" style="color: #93c5fd">용도별 차종별 시군구별 자동차주행거리(KOSIS)</a>.<br /><b>연료 가격
+                    출처:</b> 제공된 「주유소 지역별 평균판매가격」
+                휘발유·경유 CSV 및 「자동차충전소 지역별 평균판매가격」 LPG CSV.
+                파일에 기재된 연도·지역별 가격을 사용합니다.
+            </div>
+        </section>
+        <footer class="foot">
+            원본: 426_DT_426001_N004_20261020170551.csv · 2012–2025년 · 자동차검사
+            기반 통계 · 수치는 소수점 표시를 위해 반올림될 수 있음<br /><br /><b>자료 출처</b>
+            : 한국교통안전공단, 「자동차주행거리통계」, 2025, 국가통계포털(KOSIS),
+            조회일 2026.10.20, 「용도별 차종별 시군구별 자동차주행거리」 ·
+            <a href="https://kosis.kr/statHtml/statHtml.do?orgId=426&amp;tblId=DT_426001_N004&amp;conn_path=I2"
+                target="_blank" rel="noopener noreferrer">KOSIS 원문 통계표 ↗</a><br /><b>제도 변경 근거</b> :
+            <a href="https://mods.go.kr/boardDownload.es?bid=107&amp;list_no=444586&amp;seq=2" target="_blank"
+                rel="noopener noreferrer">국가데이터처 고시 제2026-211호 (2026.04.16.) ↗</a>
+        </footer>
+    </main>
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+    <script type="text/javascript">
+        var sc_project = 13139524;
+        var sc_invisible = 1;
+        var sc_security = "83232f9f";
+    </script>
+    <script type="text/javascript" src="https://www.statcounter.com/counter/counter.js" async></script>
+    <noscript>
+        <div class="statcounter">
+            <a title="Web Analytics" href="https://statcounter.com/" target="_blank"><img class="statcounter"
+                    src="https://c.statcounter.com/13139524/0/83232f9f/1/" alt="Web Analytics"
+                    referrerpolicy="no-referrer-when-downgrade" /></a>
+        </div>
+    </noscript>
+    <!-- End of Statcounter Code -->
+</body>
+
+</html>
