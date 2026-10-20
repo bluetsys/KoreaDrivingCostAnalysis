@@ -16,8 +16,8 @@ function n(v, d = 1) {
   return v == null || !Number.isFinite(v)
     ? "—"
     : v.toLocaleString("ko-KR", {
-      maximumFractionDigits: d,
-    });
+        maximumFractionDigits: d,
+      });
 }
 function delta(a, b) {
   return a == null || b == null || b === 0 ? null : (a / b - 1) * 100;
@@ -36,13 +36,16 @@ function esc(x) {
   return String(x).replace(/[&<>"']/g, (character) => entities[character]);
 }
 function svgline(x1, y1, x2, y2, color = "#2d3d56", stroke = 1, dash = "") {
-  return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color
-    }" stroke-width="${stroke
-    }" ${dash ? 'stroke-dasharray="' + dash + '"' : ""}/>`;
+  return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${
+    color
+  }" stroke-width="${
+    stroke
+  }" ${dash ? 'stroke-dasharray="' + dash + '"' : ""}/>`;
 }
 function text(x, y, s, anchor = "start", color) {
-  return `<text x="${x}" y="${y}" text-anchor="${anchor
-    }" ${color ? 'fill="' + color + '"' : ""}>${esc(s)}</text>`;
+  return `<text x="${x}" y="${y}" text-anchor="${
+    anchor
+  }" ${color ? 'fill="' + color + '"' : ""}>${esc(s)}</text>`;
 }
 function lineChart(id, values, metric) {
   let W = 660,
@@ -88,9 +91,11 @@ function lineChart(id, values, metric) {
   }
   values.forEach((v, i) => {
     if (v != null)
-      s += `<circle cx="${X(i)}" cy="${YY(v)}" r="${i === 13 ? 5 : 3.5
-        }" fill="${i === 13 ? "#f59e0b" : "#60a5fa"
-        }"><title>${Y[i]}년: ${n(v, metric ? 0 : 2)}</title></circle>`;
+      s += `<circle cx="${X(i)}" cy="${YY(v)}" r="${
+        i === 13 ? 5 : 3.5
+      }" fill="${
+        i === 13 ? "#f59e0b" : "#60a5fa"
+      }"><title>${Y[i]}년: ${n(v, metric ? 0 : 2)}</title></circle>`;
   });
   s += svgline(
     X(12) + (X(13) - X(12)) / 2,
@@ -188,8 +193,9 @@ function render() {
   Y.forEach((z, i) => {
     let v = vals[i],
       d = i ? delta(v, vals[i - 1]) : null;
-    tbl += `<tr><td>${z}${z === 2025 ? ' <span class="pill">방식 변경</span>' : ""}</td><td>${n(v, m ? 0 : 2)}</td><td class="${d == null ? "muted" : d >= 0 ? "positive" : "negative"
-      }">${pct(d)}</td><td class="muted">${m && z === 2025 ? "승인통계 제외" : !m && z === 2025 ? "측정치" : "추정치"}</td></tr>`;
+    tbl += `<tr><td>${z}${z === 2025 ? ' <span class="pill">방식 변경</span>' : ""}</td><td>${n(v, m ? 0 : 2)}</td><td class="${
+      d == null ? "muted" : d >= 0 ? "positive" : "negative"
+    }">${pct(d)}</td><td class="muted">${m && z === 2025 ? "승인통계 제외" : !m && z === 2025 ? "측정치" : "추정치"}</td></tr>`;
   });
   $("yearTable").innerHTML = tbl;
   let prov = R.filter((z) => z.level === "province")
@@ -240,8 +246,8 @@ render();
     n == null || !Number.isFinite(n)
       ? "—"
       : n.toLocaleString("ko-KR", {
-        maximumFractionDigits: d,
-      });
+          maximumFractionDigits: d,
+        });
   const fuelSel = $("fuelYear");
   for (let y = 2012; y <= 2026; y++) fuelSel.add(new Option(y + "년", y));
   fuelSel.value = "2026";
@@ -447,8 +453,8 @@ render();
     v == null || !Number.isFinite(v)
       ? "—"
       : v.toLocaleString("ko-KR", {
-        maximumFractionDigits: d,
-      });
+          maximumFractionDigits: d,
+        });
   for (let y = 2012; y <= 2026; y++)
     document
       .getElementById("fuseYear")
@@ -480,7 +486,7 @@ render();
         ? values.reduce((a, b) => a + b, 0) / values.length
         : null;
     }
-    return pr[regNames[r.name] || regNames[r.parent]] ?? null;
+    return pr[regNames[r.name] || regNames[r.parent] || r.name] ?? null;
   }
   function calc(y, rr, c, f) {
     let use = Math.min(y, 2025),
@@ -586,12 +592,11 @@ render();
         r,
         ...calc(y, r.id, c, f),
       }))
-      .filter((x) => x.cost != null)
-      .sort((a, b) => b.cost - a.cost);
+      .sort((a, b) => (b.cost ?? -1) - (a.cost ?? -1));
     document.getElementById("fuseRegionRows").innerHTML = regionList
       .map(
         (x) =>
-          `<tr><td>${x.r.name}</td><td>${ffmt(x.d, 2)}</td><td>${ffmt(x.dist, 0)}</td><td>${ffmt(x.e.harmonic, 2)}</td><td>${ffmt(x.p, 1)}</td><td>${ffmt(x.cost, 0)}</td><td>${v.cost != null ? ffmt((x.cost / v.cost - 1) * 100, 1) + "%" : "—"}</td></tr>`,
+          `<tr><td>${x.r.name}</td><td>${ffmt(x.d, 2)}</td><td>${ffmt(x.dist, 0)}</td><td>${ffmt(x.e?.harmonic ?? null, 2)}</td><td>${ffmt(x.p, 1)}</td><td>${ffmt(x.cost, 0)}</td><td>${x.cost != null && v.cost != null ? ffmt((x.cost / v.cost - 1) * 100, 1) + "%" : "자료 없음"}</td></tr>`,
       )
       .join("");
   }
