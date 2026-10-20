@@ -16,7 +16,8 @@ function n(v, d = 1) {
   return v == null || !Number.isFinite(v)
     ? "—"
     : v.toLocaleString("ko-KR", {
-        maximumFractionDigits: d,
+        minimumFractionDigits: 1,
+        maximumFractionDigits: Math.max(1, d),
       });
 }
 function delta(a, b) {
@@ -246,7 +247,8 @@ render();
     n == null || !Number.isFinite(n)
       ? "—"
       : n.toLocaleString("ko-KR", {
-          maximumFractionDigits: d,
+          minimumFractionDigits: 1,
+          maximumFractionDigits: Math.max(1, d),
         });
   const fuelSel = $("fuelYear");
   for (let y = 2012; y <= 2026; y++) fuelSel.add(new Option(y + "년", y));
@@ -453,7 +455,8 @@ render();
     v == null || !Number.isFinite(v)
       ? "—"
       : v.toLocaleString("ko-KR", {
-          maximumFractionDigits: d,
+          minimumFractionDigits: 1,
+          maximumFractionDigits: Math.max(1, d),
         });
   for (let y = 2012; y <= 2026; y++)
     document
